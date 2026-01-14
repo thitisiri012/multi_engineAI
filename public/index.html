@@ -139,62 +139,75 @@
 
     <script>
         async function search() {
-            const question = document.getElementById('question').value.trim();
-            const model = document.getElementById('model').value;
-            
-            if (!question) {
-                showError('กรุณาพิมพ์คำถาม');
-                return;
-            }
+    const question = document.getElementById('question').value.trim();
+    const model = document.getElementById('model').value;
+    
+    if (!question) {
+        showError('กรุณาพิมพ์คำถาม');
+        return;
+    }
 
-            const btn = document.getElementById('searchBtn');
-            const loading = document.getElementById('loading');
-            const result = document.getElementById('result');
-            const error = document.getElementById('error');
+    const btn = document.getElementById('searchBtn');
+    const loading = document.getElementById('loading');
+    const result = document.getElementById('result');
+    const error = document.getElementById('error');
 
-            btn.disabled = true;
-            loading.classList.add('show');
-            result.classList.remove('show');
-            error.classList.remove('show');
+    btn.disabled = true;
+    loading.classList.add('show');
+    result.classList.remove('show');
+    error.classList.remove('show');
 
-            try {
-                const response = await fetch('/api/search', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ question, model })
-                });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.error || 'เกิดข้อผิดพลาด');
-                }
-
-                result.textContent = data.answer;
-                result.classList.add('show');
-
-            } catch (err) {
-                showError(err.message);
-            } finally {
-                btn.disabled = false;
-                loading.classList.remove('show');
-            }
-        }
-
-        function showError(msg) {
-            const error = document.getElementById('error');
-            error.textContent = '❌ ' + msg;
-            error.classList.add('show');
-        }
-
-        document.getElementById('question').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                search();
-            }
+    try {
+        console.log('Sending request to /api/search...');
+        
+        const response = await fetch('/api/search', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+                question: question,
+                model: model
+            })
         });
+
+        console.log('Response status:', response.status);
+
+        // ตรวจสอบ Content-Type
+        const contentType = response.headers.get('content-type');
+        console.log('Content-Type:', contentType);
+
+        if (!contentType || !contentType.includes('application/json')) {
+            const text = await response.text();
+            console.error('Non-JSON response:', text);
+            throw new Error('Server returned HTML instead of JSON. Check API configuration.');
+        }
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'เกิดข้อผิดพลาด');
+        }
+
+        result.textContent = data.answer;
+        result.classList.add('show');
+
+    } catch (err) {
+        console.error('Error:', err);
+        showError(err.message);
+    } finally {
+        btn.disabled = false;
+        loading.classList.remove('show');
+    }
+}
+
+function showError(msg) {
+    const error = document.getElementById('error');
+    error.textContent = '❌ ' + msg;
+    error.classList.add('show');
+}
+       
+        
     </script>
 </body>
 </html>
