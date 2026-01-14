@@ -1,0 +1,16 @@
+{
+  "name": "groq-search-engine",
+  "version": "1.0.0",
+  "description": "AI Search Engine with Groq API",
+  "main": "api/search.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "vercel build"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.1"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
